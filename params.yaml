@@ -1,3 +1,6 @@
+TRAIN_SIZE: 0.7                 # TRAIN_SIZE + VALIDATION_SIZE + TEST_SIZE === 1 !!!
+VALIDATION_SIZE: 0.2            #
+TEST_SIZE: 0.1                  #
 AUGMENTATION: True              # Data augmentation
 IMAGE_SIZE: 128                 #
 BATCH_SIZE: 64                  # 
