@@ -1,0 +1,17 @@
+--extra-index-url https://download.pytorch.org/whl/cu118
+torch
+torchvision
+torchaudio
+notebook
+numpy
+pandas
+matplotlib
+python-box==6.0.2
+pyYaml
+tqdm
+ensure==1.0.2
+joblib
+types-PyYAML
+gdown
+dvc
+-e .
