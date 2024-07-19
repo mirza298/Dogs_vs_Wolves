@@ -14,6 +14,7 @@ class DataIngestionConfig:
 class ModelConfig:
     root_dir: Path
     trained_model_path: Path
+    trained_model_inference_path: Path
     data: Path
     params_train_size: float
     params_validation_size: float

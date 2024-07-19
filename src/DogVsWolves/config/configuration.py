@@ -27,6 +27,8 @@ class ConfigurationManager:
             unzip_dir=Path(config.unzip_dir) 
         )
 
+        return data_ingestion_config
+
 
     def get_model_config(self) -> ModelConfig:
         config = self.config.model
@@ -37,6 +39,7 @@ class ConfigurationManager:
         model_config = ModelConfig(
             root_dir=Path(config.root_dir),
             trained_model_path=Path(config.trained_model_path),
+            trained_model_inference_path=Path(config.trained_model_inference_path),
             data=Path(data),
             params_train_size= self.params.TRAIN_SIZE,
             params_validation_size=self.params.VALIDATION_SIZE,

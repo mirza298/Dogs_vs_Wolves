@@ -1,5 +1,8 @@
 import os
+import sys
+import time
 import numpy as np
+import matplotlib.pyplot as plt
 import torch
 from torch.utils.data import Dataset, DataLoader, SubsetRandomSampler
 from torchvision.io import read_image
@@ -39,14 +42,14 @@ class ImageDataset(Dataset):
 
 class PrepareData:
     def __init__(self, config: ModelConfig):
-         self._config = config
+         self.config = config
     
     def split(self):
-        if self._config.params_is_augmentation:
+        if self.config.params_augmentation:
             self._transform = v2.Compose([
                 v2.Resize(
-                    size=(self._config.params_image_size, 
-                          self._config.params_image_size), antialias=True),
+                    size=(self.config.params_image_size, 
+                          self.config.params_image_size), antialias=True),
                 v2.RandomHorizontalFlip(),
                 v2.RandomVerticalFlip(),
                 v2.ColorJitter(),
@@ -58,13 +61,13 @@ class PrepareData:
             self._transform = None
 
         # Create Dataset instance
-        data = ImageDataset(image_directory=self._config.data, transform=self._transform)
+        data = ImageDataset(image_directory=self.config.data, transform=self._transform)
     
         # Define DataLoader for train(70%), validation(20%) and test(10%) dataset
         self._dataset_size = len(data)
         indices = list(range(self._dataset_size))
-        train_split = int(np.floor(self._config.params_train_size * self._dataset_size))
-        validation_split = int(np.floor(self._config.params_validation_size * self._dataset_size))
+        train_split = int(np.floor(self.config.params_train_size * self._dataset_size))
+        validation_split = int(np.floor(self.config.params_validation_size * self._dataset_size))
 
         np.random.shuffle(indices)
 
@@ -189,9 +192,13 @@ class ConvolutionalNeuralNetwork(nn.Module):
 class ModelTrainer:
     def __init__(self, config: ModelConfig, model: ConvolutionalNeuralNetwork):
         self.config = config
-        self.model = model
+        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        self.model = model.to(self.device)
+        self.loss_function = nn.CrossEntropyLoss()
+        self.optimizer = torch.optim.Adam(params=self.model.parameters(), lr=self.config.params_learning_rate)
     
-    def _train_step(self):
+
+    def _train_step(self, train_loader):
         # 1.) Set model mode to train
         self.model.train()
         
@@ -199,7 +206,7 @@ class ModelTrainer:
         loss_results, acc_results = 0, 0
         
         # 3.) Loop throught batches
-        for i, (X, y) in enumerate(self.train_loader):
+        for i, (X, y) in enumerate(train_loader):
             # 3.1) Move data to device, model has to be on same device!
             X, y = X.to(self.device), y.to(self.device)
             
@@ -222,9 +229,10 @@ class ModelTrainer:
             self.optimizer.step()
         
         # 4.) Retrun loss and accuracy
-        return loss_results / len(self.train_loader), acc_results / len(self.train_loader)
+        return loss_results / len(train_loader), acc_results / len(train_loader)
     
-    def _evaluation_step(self, data_loader: DataLoader):
+
+    def _evaluation_step(self, evaluation_loader: DataLoader):
         # 1.) Set model mode to evaluate mode
         self.model.eval()
         
@@ -233,7 +241,7 @@ class ModelTrainer:
         
         with torch.no_grad():
             # 3.) Loop throught batches
-            for i, (X, y) in enumerate(data_loader):
+            for i, (X, y) in enumerate(evaluation_loader):
                 # 3.1) Move data to device, model has to be on same device!
                 X, y = X.to(self.device), y.to(self.device)
 
@@ -247,9 +255,10 @@ class ModelTrainer:
                 acc_results += (y_predictions_label == y).sum().item() / len(y)
             
             # 4.) Retrun loss and accuracy
-            return loss_results / len(data_loader), acc_results / len(data_loader)
+            return loss_results / len(evaluation_loader), acc_results / len(evaluation_loader)
 
-    def train_model(self):
+
+    def train_model(self, train_loader, validation_loader):
         # 1.) Create dictionary for results
         train_results = {
             "train_loss": [],
@@ -259,22 +268,22 @@ class ModelTrainer:
         }
 
         # 2.) Train model for number of epochs
-        for epoch in tqdm(range(self.config.params_epoch)):
+        for epoch in tqdm(range(self.config.params_epochs), file=sys.stdout):
             # 2.1) Train step
-            train_loss, train_acc = self._train_step()
+            train_loss, train_acc = self._train_step(train_loader)
 
             # 2.2) Validation step
-            validation_loss, validation_acc = self._evaluation_step(data_loader=self.validation_loader)
+            validation_loss, validation_acc = self._evaluation_step(validation_loader)
 
             # 2.3) Print progress
-            if (epoch+1) % 10 == 0:
-                print(
-                    f"Epoch: {epoch+1} | "
-                    f"Train loss: {train_loss:.4f} | "
-                    f"Train accuracy: {train_acc:.4f} | "
-                    f"Validation loss: {validation_loss:.4f} | "
-                    f"Validation accuracy: {validation_acc:.4f}"
-                )
+            print('\r\033[2K\033[1G', end='', flush=True)
+            print(
+                f"Epoch: {epoch+1} | "
+                f"Train loss: {train_loss:.4f} | "
+                f"Train accuracy: {train_acc:.4f} | "
+                f"Validation loss: {validation_loss:.4f} | "
+                f"Validation accuracy: {validation_acc:.4f}"
+            )
 
             # 2.4) Save loss and accuracy to results
             train_results["train_loss"].append(train_loss)
@@ -285,23 +294,35 @@ class ModelTrainer:
         # 3.) Return results and trained model
         return train_results
     
-    def evaluate_model(self):
-        test_loss, test_acc = self._evaluation_step(data_loader=self.test_loader)
 
-        print(f"Test loss: {test_loss:.4f} | "
-              f"Test accuracy: {test_acc:.4f} | ")
+    def evaluate_model(self, test_loader):
+        test_loss, test_acc = self._evaluation_step(test_loader)
 
-        test_results = {
-            "test_loss": test_loss,
-            "test_acc": test_acc
-        }
+        print(f"Test loss: {test_loss:.4f} | Test accuracy: {test_acc:.4f} ")
         
-        return test_results
+        return test_loss, test_acc
 
     
-    def save_model(self, path: Path):
-        torch.save(self.model, self.config.trained_model_path)
+    def save_model(self, init_time):
+        torch.save(self.model, str(self.config.trained_model_path) + "_" + str(int(init_time)) + ".pth")
+        torch.save(self.model, self.config.trained_model_inference_path)
+
 
     @staticmethod
-    def plot_results(results):
-        pass
+    def plot_results(results, init_time, path):
+        figure, axes = plt.subplots(figsize = (15, 5), ncols = 2)
+
+        axes[0].plot(results["train_loss"], color = "blue", label = "Train Loss")
+        axes[0].plot(results["validation_loss"], color = "red", label = "Validation Loss")
+        axes[0].legend()
+        axes[0].grid()
+
+        axes[1].plot(results["train_acc"], color = "blue", label = "Train Accuracy")
+        axes[1].plot(results["validation_acc"], color = "red", label = "Validation Accuracy")
+        axes[1].legend()
+        axes[1].grid()
+
+        figure.savefig(str(path) + "_results_" + str(int(init_time)) + ".png")
+
+        plt.show()
+
