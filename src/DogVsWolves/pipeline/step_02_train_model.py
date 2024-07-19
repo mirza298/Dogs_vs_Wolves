@@ -14,18 +14,22 @@ class ModelTrainingPipeline:
         config = ConfigurationManager()
         model_config = config.get_model_config()
 
-        model = ConvolutionalNeuralNetwork(model_config)
+        init_time = time.time()
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        model = ConvolutionalNeuralNetwork(model_config, init_time)
+        model = model.to(device)
+        loss_function = nn.CrossEntropyLoss()
+        optimizer = torch.optim.Adam(params=model.parameters(), lr=model_config.params_learning_rate)
         print("Model arhitecture: ", model)
 
         prepare_data = PrepareData(model_config)
         train_loader, validation_loader, test_loader = prepare_data.split()
 
-        init_time = time.time()
-        train_procedure = ModelTrainer(model_config, model)
-        train_results = train_procedure.train_model(train_loader, validation_loader)
-        test_results = train_procedure.evaluate_model(test_loader)
-        train_procedure.plot_results(train_results, init_time, model_config.trained_model_path)
-        train_procedure.save_model(init_time)
+        model.fit(train_loader, validation_loader, device, loss_function, optimizer)
+        test_loss, test_acc  = model.evaluate_model(test_loader, device, loss_function)
+        print(f"Test loss: {test_loss:.4f} | Test accuracy: {test_acc:.4f} ")
+        model.plot_results()
+        model.save_model()
 
 
 if __name__ == '__main__':

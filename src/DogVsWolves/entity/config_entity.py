@@ -27,3 +27,10 @@ class ModelConfig:
     params_channels: int
     params_kernel_size_cl: int
     params_optimizer: str
+
+
+@dataclass(frozen=True)
+class EvaluationConfig:
+    data_dir: Path
+    trained_model_inference_path: Path
+    params_image_size: int

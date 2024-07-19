@@ -1,7 +1,7 @@
 import os
 from DogVsWolves.constants import *
 from DogVsWolves.utils.common import read_yaml, create_directories
-from DogVsWolves.entity.config_entity import (DataIngestionConfig, ModelConfig)
+from DogVsWolves.entity.config_entity import (DataIngestionConfig, ModelConfig, EvaluationConfig)
 
 
 class ConfigurationManager:
@@ -55,3 +55,15 @@ class ConfigurationManager:
         )
 
         return model_config
+    
+
+    def get_evaluation_config(self) -> EvaluationConfig:
+        config = self.config.evaluation
+
+        evaluation_config = EvaluationConfig(
+            data_dir=Path(config.data_dir),
+            trained_model_inference_path=Path(config.trained_model_inference_path),
+            params_image_size=self.params.IMAGE_SIZE
+        )
+
+        return evaluation_config

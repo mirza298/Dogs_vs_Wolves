@@ -8,7 +8,13 @@ data_ingestion:
   local_data_file: artifacts/data_ingestion/data.zip
   unzip_dir: artifacts/data_ingestion
 
+
 model:
   root_dir: artifacts/trained_model
   trained_model_path: artifacts/trained_model/model
+  trained_model_inference_path: model/model.pth
+
+
+evaluation:
+  data_dir: evaluation_data/
   trained_model_inference_path: model/model.pth
