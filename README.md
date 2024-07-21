@@ -35,6 +35,8 @@ Logs are added for some project steps. Project building and running are explaine
 
 ## How to Build
 
+Project is tested with python version 3.10.12
+
 ```bash
 # clone project 
 git clone https://github.com/mirza298/Dogs_vs_Wolves.git
