@@ -8,7 +8,9 @@ Project description - tasks:
 
 Convolutional neural network is constructed from 4 convolutional blocks (Convolution layer + Relu activation + Batch normalization + MaxPolling + Dropout) and output layer with two fully conected layers. Model arhitecture is mostly inspired form the networks VGG and ResNet, and it isn't modeluar, for different changing layer order and parameters is necessary. Model arhitecture is shown on the image bellow:
 
-![alt text](/images/cnn_arhitecture.png "Title")
+<p align="center">
+  <img src="/images/cnn_arhitecture.png" />
+</p>
 
 2) **Choose your own optimizer, loss function and classification metric to evaluate the performance of your classifier. You can train your network on either GPU (if you possess one) or CPU.**
 
