@@ -13,4 +13,7 @@ tqdm
 joblib
 types-PyYAML
 gdown
+dvc
+customtkinter
+tkinter
 -e .

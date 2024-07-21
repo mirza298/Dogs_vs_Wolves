@@ -1,6 +1,6 @@
 import customtkinter as ctk
 from PIL import Image
-from tkinter import filedialog, Label
+from tkinter import filedialog
 import torch
 from torchvision.io import read_image
 from torchvision.transforms import v2
@@ -37,7 +37,7 @@ class ImageApp:
 
     def load_model(self):
         self.config = ConfigurationManager()
-        self.config = self.config.get_model_config()
+        self.config = self.config.get_evaluation_config()
         self.model = ConvolutionalNeuralNetwork()
         self.model.load_state_dict(torch.load(self.config.trained_model_inference_path))
         self.model.eval()

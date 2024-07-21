@@ -12,10 +12,10 @@ class ModelTrainingPipeline:
 
     def main(self):
         config = ConfigurationManager()
-        model_config = config.get_train_validation_test_config()
+        train_validation_test_config = config.get_train_validation_test_config()
 
         # Prepare data
-        prepare_data = PrepareData(model_config)
+        prepare_data = PrepareData(train_validation_test_config)
         train_loader, validation_loader, test_loader = prepare_data.split()
 
         # Initalize model
@@ -23,26 +23,34 @@ class ModelTrainingPipeline:
         model = ConvolutionalNeuralNetwork()
         model = model.to(device)
         loss_function = nn.CrossEntropyLoss()
-        optimizer = torch.optim.Adam(params=model.parameters(), lr=model_config.params_learning_rate)
+        optimizer = torch.optim.Adam(params=model.parameters(), 
+                                     lr=train_validation_test_config.params_learning_rate)
         print("Model arhitecture: ", model)
 
         # Train model
-        model.fit(model_config.params_epochs, train_loader, validation_loader, device, loss_function, optimizer)
+        model.fit(train_validation_test_config.params_epochs,
+                  train_validation_test_config.params_tolerance,
+                  train_validation_test_config.params_min_delta,
+                  train_loader, 
+                  validation_loader, 
+                  device, 
+                  loss_function, 
+                  optimizer)
 
         # Evaluate model on test data
         test_loss, test_acc, y_pred, y_true  = model.evaluate_model(test_loader, device, loss_function)
         print(f"Test loss: {test_loss:.4f} | Test accuracy: {test_acc:.4f} ")
 
         # Plot train results and Confusion matrix for test results
-        model_dir = str(model_config.trained_model_path) + f"_{int(model.init_time)}"
+        model_dir = str(train_validation_test_config.trained_model_path) + f"_{int(model.init_time)}"
         create_directories([model_dir])
         model.plot_results(model_dir)
         plot_confusion_matrix(y_true, y_pred, prepare_data.data.image_labels_mapping, model_dir)
 
         # Save model and config
-        model.save_model(model_dir, model_config.trained_model_inference_path)
+        model.save_model(model_dir, train_validation_test_config.trained_model_inference_path)
         with open(f'{model_dir}/model_config.json', 'w') as f:
-            json.dump(json.dumps(dataclass_to_dict(model_config)), f)
+            json.dump(json.dumps(dataclass_to_dict(train_validation_test_config)), f)
 
 
 if __name__ == '__main__':

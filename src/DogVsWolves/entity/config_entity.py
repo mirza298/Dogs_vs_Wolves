@@ -24,6 +24,8 @@ class TrainValidationTestConfig:
     params_batch_size: int
     params_epochs: int
     params_learning_rate: float
+    params_tolerance: int
+    params_min_delta: float
 
 
 @dataclass(frozen=True)

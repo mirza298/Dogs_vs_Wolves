@@ -2,8 +2,6 @@
 
 ## Description
 
-Project description - tasks:
-
 1) **Develop your own end-to-end convolutional neural network in Pytorch. Build a binary classifier that separates wolves from dogs using this kaggle dataset. Using pre-trained CNNs like ResNet, Vgg, DenseNet, etc. is not allowed!**
 
 Convolutional neural network is constructed from 4 convolutional blocks (Convolution layer + Relu activation + Batch normalization + MaxPolling + Dropout) and output layer with two fully conected layers. Model arhitecture is mostly inspired form the networks VGG and ResNet, and it isn't modeluar, for different changing layer order and parameters is necessary. Model arhitecture is shown on the image bellow:

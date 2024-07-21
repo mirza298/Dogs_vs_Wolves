@@ -38,6 +38,7 @@ def stratified_split(y: np.ndarray,
     """
     if random_state is not None:
         np.random.seed(random_state)
+    
     # Indices for each class
     y = np.array(y)
     indices = np.arange(len(y))
@@ -118,7 +119,7 @@ def plot_confusion_matrix(y_true: np.ndarray,
     # Add labels and title
     plt.ylabel('True Label')
     plt.xlabel('Predicted Label')
-    plt.title(f'Confusion Matrix for test set, Accuracy: {np.round(accuracy, 4)}')
+    plt.title(f'Confusion Matrix for test set\nAccuracy: {np.round(accuracy, 4)}')
 
     # Save plot
     if save_path:
@@ -194,7 +195,7 @@ class PrepareData:
         # Create Dataset instance
         self.data = ImageDataset(image_directory=self.config.data, transform=self.transform)
     
-        # Define DataLoader for train(70%), validation(20%) and test(10%) dataset
+        # Create indices for train(70%), validation(20%) and test(10%) dataset
         train_indices, validation_indices, test_indices = stratified_split(self.data.image_labels_list, 
                                                                            self.config.params_train_size,
                                                                            self.config.params_validation_size,
@@ -233,11 +234,6 @@ class ConvolutionalNeuralNetwork(nn.Module):
         # Model Arhitecture
         self.convolution_block = nn.Sequential(
             # First Convolution Layer
-            # Input size: [128, 128, 3]
-            # Output size: [1+(128 + 2 * padding - kernel_size)/stride,
-            #              1+(128 + 2 * padding - kernel_size)/stride,
-            #              out_channels]
-            # padding: 0, stride: 1, kernel_size: 5
             # Input: 128 x 128 x 3
             # Output: 62 x 62 x 4
             nn.Conv2d(in_channels=3, out_channels=4, kernel_size=5, stride=1, padding=0),
@@ -360,7 +356,7 @@ class ConvolutionalNeuralNetwork(nn.Module):
         return loss_results / len(evaluation_loader), acc_results / len(evaluation_loader), predictions, y_true
         
 
-    def fit(self, epochs, train_loader, validation_loader, device, loss_function, optimizer):
+    def fit(self, epochs, tolerance, min_delta, train_loader, validation_loader, device, loss_function, optimizer):
         """
         Fit CNN model on train data and validate during training.
 
@@ -371,6 +367,9 @@ class ConvolutionalNeuralNetwork(nn.Module):
             - loss_function: Model loss function
             - optimizer: Model optimizer
         """
+
+        early_stopping = EarlyStopping(tolerance, min_delta)
+
         # 1.) Create dictionary for results
         self.train_results = {
             "train_loss": [],
@@ -403,6 +402,12 @@ class ConvolutionalNeuralNetwork(nn.Module):
             self.train_results["train_acc"].append(train_acc)
             self.train_results["validation_loss"].append(validation_loss)
             self.train_results["validation_acc"].append(validation_acc)
+
+            # 3.7) Early stopping
+            early_stopping(validation_loss)
+            if early_stopping.early_stop:
+                print("Early stoping at epoch:", epoch)
+                break
     
 
     def evaluate_model(self, test_loader, device, loss_function):
@@ -438,16 +443,38 @@ class ConvolutionalNeuralNetwork(nn.Module):
 
         axes[0].plot(self.train_results["train_loss"], color = "blue", label = "Train Loss")
         axes[0].plot(self.train_results["validation_loss"], color = "red", label = "Validation Loss")
+        axes[0].set_ylabel("Cross Entropy Loss")
+        axes[0].set_xlabel("Epoch")
         axes[0].legend()
         axes[0].grid()
 
         axes[1].plot(self.train_results["train_acc"], color = "blue", label = "Train Accuracy")
         axes[1].plot(self.train_results["validation_acc"], color = "red", label = "Validation Accuracy")
+        axes[1].set_ylabel("Accuracy")
+        axes[1].set_xlabel("Epoch")
         axes[1].legend()
         axes[1].grid()
 
-        figure.suptitle(f"Trainig results for model_{self.init_time}")
+        figure.suptitle(f"Trainig results for model_{int(self.init_time)}")
 
         figure.savefig(str(save_path) + "/train_results.png")
 
         plt.show()
+
+
+class EarlyStopping:
+    def __init__(self, tolerance=1, min_delta=0):
+        self.tolerance = tolerance
+        self.min_delta = min_delta
+        self.counter = 0
+        self.min_validation_loss = float('inf')
+        self.early_stop = False
+
+    def __call__(self, validation_loss):
+        if validation_loss < self.min_validation_loss:
+            self.min_validation_loss = validation_loss
+            self.counter = 0
+        elif validation_loss > (self.min_validation_loss + self.min_delta):
+            self.counter += 1
+            if self.counter >= self.tolerance:
+                self.early_stop = True

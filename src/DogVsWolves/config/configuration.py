@@ -31,7 +31,7 @@ class ConfigurationManager:
 
 
     def get_train_validation_test_config(self) -> TrainValidationTestConfig:
-        config = self.config.model
+        config = self.config.train_validation_test
         data = os.path.join(self.config.data_ingestion.unzip_dir, "data")
 
         create_directories([config.root_dir])
@@ -48,7 +48,9 @@ class ConfigurationManager:
             params_image_size=self.params.IMAGE_SIZE,
             params_batch_size=self.params.BATCH_SIZE,
             params_epochs=self.params.EPOCHS,
-            params_learning_rate=self.params.LEARNING_RATE
+            params_learning_rate=self.params.LEARNING_RATE,
+            params_tolerance=self.params.TOLERANCE,
+            params_min_delta=self.params.MIN_DELTA
         )
 
         return train_validation_test_config
