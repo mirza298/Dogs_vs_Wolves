@@ -3,7 +3,7 @@ torch
 torchvision
 torchaudio
 notebook
-numpy
+numpy==1.26.3
 pandas
 matplotlib
 seaborn
@@ -15,5 +15,5 @@ types-PyYAML
 gdown
 dvc
 customtkinter
-tkinter
+tk
 -e .

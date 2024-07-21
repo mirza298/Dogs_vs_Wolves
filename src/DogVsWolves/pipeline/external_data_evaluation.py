@@ -26,13 +26,8 @@ class ExternalDataEvaluation:
         model.load_state_dict(torch.load(self.config.trained_model_inference_path))
         model = model.to(device)
 
-        loss, accuracy, y_true, y_pred = model.evaluate_model(data_loader, device, loss_function)
+        loss, accuracy, y_pred, y_true = model.evaluate_model(data_loader, device, loss_function)
 
         print(f"Test loss: {loss:.4f} | Test accuracy: {accuracy:.4f} ")
 
         plot_confusion_matrix(y_true, y_pred, data.image_labels_mapping)
-
-
-
-
-    
