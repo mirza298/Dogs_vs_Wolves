@@ -1,7 +1,7 @@
 import os
 from DogVsWolves.constants import *
 from DogVsWolves.utils.common import read_yaml, create_directories
-from DogVsWolves.entity.config_entity import (DataIngestionConfig, ModelConfig, EvaluationConfig)
+from DogVsWolves.entity.config_entity import (DataIngestionConfig, TrainValidationTestConfig, EvaluationConfig)
 
 
 class ConfigurationManager:
@@ -30,13 +30,13 @@ class ConfigurationManager:
         return data_ingestion_config
 
 
-    def get_model_config(self) -> ModelConfig:
+    def get_train_validation_test_config(self) -> TrainValidationTestConfig:
         config = self.config.model
         data = os.path.join(self.config.data_ingestion.unzip_dir, "data")
 
         create_directories([config.root_dir])
 
-        model_config = ModelConfig(
+        train_validation_test_config = TrainValidationTestConfig(
             root_dir=Path(config.root_dir),
             trained_model_path=Path(config.trained_model_path),
             trained_model_inference_path=Path(config.trained_model_inference_path),
@@ -48,13 +48,10 @@ class ConfigurationManager:
             params_image_size=self.params.IMAGE_SIZE,
             params_batch_size=self.params.BATCH_SIZE,
             params_epochs=self.params.EPOCHS,
-            params_learning_rate=self.params.LEARNING_RATE,
-            params_channels=self.params.CHANNELS,
-            params_kernel_size_cl=self.params.KERNEL_SIZE_CL,
-            params_optimizer=self.params.OPTIMIZER
+            params_learning_rate=self.params.LEARNING_RATE
         )
 
-        return model_config
+        return train_validation_test_config
     
 
     def get_evaluation_config(self) -> EvaluationConfig:

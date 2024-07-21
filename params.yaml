@@ -4,8 +4,5 @@ TEST_SIZE: 0.1                  #
 AUGMENTATION: True              # Data augmentation
 IMAGE_SIZE: 128                 #
 BATCH_SIZE: 64                  # 
-EPOCHS: 10                      # Number of epochs - model training iterations
-LEARNING_RATE: 0.001            # Optimizer learning rate (step)
-CHANNELS: 4                     # Convolution layer depth
-KERNEL_SIZE_CL: 5               # Convolution layer filter size
-OPTIMIZER: "Adam"               # Adam and SGD are only supported
+EPOCHS: 2                       # Number of epochs - model training iterations
+LEARNING_RATE: 0.0001           # Optimizer learning rate (step)

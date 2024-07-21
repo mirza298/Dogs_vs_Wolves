@@ -1,13 +1,15 @@
 import os
 from box.exceptions import BoxValueError
 import yaml
+import dataclasses
+import json
 from DogVsWolves import logger
-from ensure import ensure_annotations
 from box import ConfigBox
 from pathlib import Path
+from dataclasses import asdict
+from pathlib import PosixPath
 
 
-@ensure_annotations
 def read_yaml(path_to_yaml: Path) -> ConfigBox:
     """reads yaml file and returns
 
@@ -32,7 +34,6 @@ def read_yaml(path_to_yaml: Path) -> ConfigBox:
         raise e
     
 
-@ensure_annotations
 def create_directories(path_to_directories: list, verbose=True):
     """create list of directories
 
@@ -44,3 +45,16 @@ def create_directories(path_to_directories: list, verbose=True):
         os.makedirs(path, exist_ok=True)
         if verbose:
             logger.info(f"created directory at: {path}")
+
+
+def dataclass_to_dict(obj):
+    if isinstance(obj, PosixPath):
+        return str(obj)
+    elif hasattr(obj, "__dataclass_fields__"):
+        return {k: dataclass_to_dict(v) for k, v in asdict(obj).items()}
+    elif isinstance(obj, (list, tuple)):
+        return [dataclass_to_dict(i) for i in obj]
+    elif isinstance(obj, dict):
+        return {k: dataclass_to_dict(v) for k, v in obj.items()}
+    else:
+        return obj

@@ -1,0 +1,23 @@
+stages:
+  step_01_data_ingestion:
+    cmd: python src/DogVsWolves/pipeline/step_01_data_ingestion.py
+    deps:
+      - config/config.yaml
+      - src/DogVsWolves/pipeline/step_01_data_ingestion.py
+    outs:
+      - artifacts/data_ingestion/data
+
+  step_02_train_validate_test_model:
+    cmd: python src/DogVsWolves/pipeline/step_02_train_validate_test_model.py
+    deps:
+      - config/config.yaml
+      - src/DogVsWolves/pipeline/step_02_train_validate_test_model.py
+    params:
+      - TRAIN_SIZE
+      - VALIDATION_SIZE
+      - TEST_SIZE
+      - AUGMENTATION
+      - IMAGE_SIZE
+      - BATCH_SIZE
+      - EPOCHS
+      - LEARNING_RATE

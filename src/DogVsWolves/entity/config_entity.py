@@ -11,7 +11,7 @@ class DataIngestionConfig:
 
 
 @dataclass(frozen=True)
-class ModelConfig:
+class TrainValidationTestConfig:
     root_dir: Path
     trained_model_path: Path
     trained_model_inference_path: Path
@@ -24,9 +24,6 @@ class ModelConfig:
     params_batch_size: int
     params_epochs: int
     params_learning_rate: float
-    params_channels: int
-    params_kernel_size_cl: int
-    params_optimizer: str
 
 
 @dataclass(frozen=True)
