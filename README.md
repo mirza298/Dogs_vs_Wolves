@@ -120,7 +120,14 @@ The pipeline can also be run with out dvc (data ingestion and model training is 
 python main.py
 ```
 
-Trained models are saved in the artifacts/ directory. The last trained model used for inference is saved in the `model/` directory. The trained model can be evaluated on new data, which must be saved in the `evaluation_data/` directory. One trained model is already saved in the `model/` directory with a toy dataset in the `evaluation_data/` directory (20 images: 10 dogs and 10 wolves), as mentioned before for demonstration purposes. Exceptionally, the training process (train, validation and testing loss/accuracy) of the saved model is shown in the notebook. Trained model evaluation on external data can be performed with:
+Trained models are saved in the artifacts/ directory. The last trained model used for inference is saved in the `model/` directory. The trained model can be evaluated on new data, which must be saved in the `evaluation_data/` directory. One trained model is already saved in the `model/` directory with a toy dataset in the `evaluation_data/` directory (20 images: 10 dogs and 10 wolves), as mentioned before for demonstration purposes. Exceptionally, the training process (train, validation and testing loss/accuracy) of the saved model is shown in the notebook. Model performance trained over 200 epochs isn't quite promising, as it struggles to differentiate dogs from wolves. We could explore other architectures, change hyperparameters, use pretrained models (transfer learning), or simply add more images (2000 images isn't a large dataset for this problem, and many of the images are problematic in terms of quality &#8594; "Garbage in, garbage out!").
+
+<p align="center">
+  <img src="/images/train_loss_acc.png" />
+  <img src="/images/test_cm.png" />
+</p>
+
+Trained model evaluation on external data can be performed with:
 
 ```bash
 # Evaluate last trained model on external data

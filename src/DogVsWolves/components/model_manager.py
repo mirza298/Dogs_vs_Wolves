@@ -122,7 +122,7 @@ def plot_confusion_matrix(y_true: np.ndarray,
     plt.title(f'Confusion Matrix for test set\nAccuracy: {np.round(accuracy, 4)}')
 
     # Save plot
-    if save_path:
+    if save_path is not None:
         plt.savefig(str(save_path) + "/test_results.png")
 
     # Show the plot
@@ -236,16 +236,16 @@ class ConvolutionalNeuralNetwork(nn.Module):
             # First Convolution Layer
             # Input: 128 x 128 x 3
             # Output: 62 x 62 x 4
-            nn.Conv2d(in_channels=3, out_channels=4, kernel_size=5, stride=1, padding=0),
+            nn.Conv2d(in_channels=3, out_channels=8, kernel_size=5, stride=1, padding=0),
             nn.ReLU(),
-            nn.BatchNorm2d(num_features=4),
+            nn.BatchNorm2d(num_features=8),
             nn.MaxPool2d(kernel_size=2),
             nn.Dropout2d(),
 
             # Second Convolution Layer
             # Input: 62 x 62 x 4
             # Output: 30 x 30 x 16
-            nn.Conv2d(in_channels=4, out_channels=16, kernel_size=5, stride=1, padding=1),
+            nn.Conv2d(in_channels=8, out_channels=16, kernel_size=5, stride=1, padding=1),
             nn.ReLU(),
             nn.BatchNorm2d(num_features=16),
             nn.MaxPool2d(kernel_size=2),
@@ -254,18 +254,18 @@ class ConvolutionalNeuralNetwork(nn.Module):
             # Third Convolution Layer
             # Input: 30 x 30 x 16
             # Output: 14 x 14 x 64
-            nn.Conv2d(in_channels=16, out_channels=64, kernel_size=5, stride=1, padding=1),
+            nn.Conv2d(in_channels=16, out_channels=24, kernel_size=5, stride=1, padding=1),
             nn.ReLU(),
-            nn.BatchNorm2d(num_features=64),
+            nn.BatchNorm2d(num_features=24),
             nn.MaxPool2d(kernel_size=2),
             nn.Dropout2d(),
 
             # Fourth Convolution Layer
             # Input: 14 x 14 x 64
             # Output: 5 x 5 x 256
-            nn.Conv2d(in_channels=64, out_channels=256, kernel_size=5, stride=1, padding=0),
+            nn.Conv2d(in_channels=24, out_channels=32, kernel_size=5, stride=1, padding=0),
             nn.ReLU(),
-            nn.BatchNorm2d(num_features=256),
+            nn.BatchNorm2d(num_features=32),
             nn.MaxPool2d(kernel_size=2),
             nn.Dropout2d(),
         )
@@ -276,9 +276,9 @@ class ConvolutionalNeuralNetwork(nn.Module):
         # Output: 2
         self.fc_block = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(in_features=5 * 5 * 256, out_features = 256),
+            nn.Linear(in_features=5 * 5 * 32, out_features = 128),
             nn.ReLU(),
-            nn.Linear(in_features=256, out_features = 2)
+            nn.Linear(in_features=128, out_features = 2)
         )
 
         
@@ -435,7 +435,7 @@ class ConvolutionalNeuralNetwork(nn.Module):
         torch.save(self.state_dict(), trained_model_inference_path)
 
 
-    def plot_results(self, save_path):
+    def plot_results(self, save_path = None):
         """
         Plot trainig/validation loss and accuracy. Plots are saved to 'artifacts/trained_model/model_results_unixtime.pth'
         """
@@ -457,7 +457,8 @@ class ConvolutionalNeuralNetwork(nn.Module):
 
         figure.suptitle(f"Trainig results for model_{int(self.init_time)}")
 
-        figure.savefig(str(save_path) + "/train_results.png")
+        if save_path is not None:
+            figure.savefig(str(save_path) + "/train_results.png")
 
         plt.show()
 

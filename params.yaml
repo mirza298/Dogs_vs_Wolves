@@ -4,7 +4,7 @@ TEST_SIZE: 0.1                  #
 AUGMENTATION: True              # Data augmentation
 IMAGE_SIZE: 128                 #
 BATCH_SIZE: 64                  # 
-EPOCHS: 2                       # Number of epochs - model training iterations
+EPOCHS: 200                     # Number of epochs - model training iterations
 LEARNING_RATE: 0.0001           # Optimizer learning rate (step)
 TOLERANCE: 5                    # Earlystopping tolerance
-MIN_DELTA: 0.01                 # Earlystopping min delta
+MIN_DELTA: 0.1                  # Earlystopping min delta
